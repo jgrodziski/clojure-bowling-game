@@ -1,6 +1,7 @@
 # Bowling Game Kata in Clojure
 
 ![Kata](kata.png)
+
 ![jesus](jesus.png)
 
 This Kata was run at the Paris Clojure User Group along with a presentation about [Data Literals](https://speakerdeck.com/jgrodziski/why-data-literals-matters).
