@@ -30,3 +30,7 @@ The project uses [Midje](https://github.com/marick/Midje/).
 `lein midje :autotest` will run all the tests indefinitely. It sets up a
 watcher on the code files. If they change, only the relevant tests will be
 run again.
+
+## Solutions to the Kata
+
+There is my own solution in [src/bowling.core.clj](https://github.com/jgrodziski/clojure-bowling-game/blob/master/src/bowling/core.clj), the one from [FlyingTof](https://twitter.com/devatsky) is [this repo](https://github.com/flyingtof/clojing) and the one from [Jon](https://twitter.com/ahoy_jon) and [Thomas](https://twitter.com/dikalikatao): [thomas-and-john-solution](https://github.com/jgrodziski/clojure-bowling-game/blob/master/thomas-and-john-solutions/src/bowling-game/core.clj).
