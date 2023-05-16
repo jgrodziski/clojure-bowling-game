@@ -19,38 +19,59 @@
       (assoc game-with-10-0 0)
       game-with-10-0)))
 
-
 (defn strike? [frame]
   (and (not (empty? frame))
-       (= (frame 0) 10)))
+       (= (get frame 0) 10)))
 
 (defn spare? [frame]
   (and (not (empty? frame))
-       (not= (frame 0) 10)
+       (not= (get frame 0) 10)
        (= (count frame) 2)
-       (= (+ (frame 0) (frame 1)) 10)))
+       (= (+ (get frame 0) (get frame 1)) 10)))
 
 (defn- calculate-bonus [frame next-rolls]
   (cond (or (nil? next-rolls)
-            (empty? next-rolls))
-        (if (strike? frame)
-          (if (= (count frame) 2) (second frame) 0) 0);tenth frame case
-        (spare? frame)
-        (first next-rolls)
-        (strike? frame)
-        (+ (first next-rolls) (second next-rolls))
+            (empty? next-rolls)) (if (strike? frame)
+                                   (if (= (count frame) 2)
+                                     (second frame)
+                                     0)
+                                   0);tenth frame case
+        (spare? frame) (first next-rolls)
+        (strike? frame) (+ (first next-rolls) (second next-rolls))
         :else 0))
 
-(defn score [game]
-  (loop [frames-to-process game
-         next-rolls nil
-         acc-score 0]
-    (if (empty? frames-to-process) acc-score
-        (let [frame (last frames-to-process)
-              score (reduce + frame)
-              bonus (calculate-bonus frame next-rolls)]
-          ;(println frame score bonus previous-rolls)
-          (recur
-           (butlast frames-to-process)
-           (flatten (subvec game (.indexOf game frame)))
-           (+ acc-score score bonus))))))
+(defn spare-and-strike->integer
+  "Replace the keywords :X and :/ by their value, respectively 10 and the value needed to go to ten from the first ball knocked-down pins"
+  [frame]
+  (cond
+    (= (count frame) 3) (conj (spare-and-strike->integer (take 2 frame)) (if (or (= (last frame) :X) (= (last frame) :x)) 10 (last frame)))   ;tenth frame case
+    (and  (or (= (first frame) :X)
+              (= (first frame) :x))
+          (or (= (second frame) :X)
+              (= (second frame) :x))) [10 10]
+    (or (= (first frame) :X)
+        (= (first frame) :x)) [10]
+    (= (second frame) :/)     [(first frame) (- 10 (first frame))]
+    ;(not (and (int? (first frame)) (int? (second frame)))) (throw (Exception.))
+    :default frame))
+
+(defn score
+  "return a vector with first element the intermediate scores and second the total score"
+  [game]
+  (let [game (vec (map spare-and-strike->integer game))]
+    (println "Game" game)
+    (loop [frames-to-process game
+           i                 1
+           intermediate      []
+           total             0]
+      (if (empty? frames-to-process) [intermediate total]
+          (let [frame (first frames-to-process)
+                score (reduce + frame)
+                bonus (calculate-bonus frame (flatten (subvec game i)))]
+            (println frame score bonus intermediate total)
+            (recur
+             (rest frames-to-process)
+             (inc i)
+             (conj intermediate (if (or (> score 0) (> bonus 0)) (+ total score bonus) 0))
+             ;(flatten (subvec game (.indexOf game frame)))
+             (+ total score bonus)))))))
